@@ -112,6 +112,7 @@ export default function CodeEditor({ question, attemptId, sectionIndex, question
             wordWrap: 'on',
             automaticLayout: true,
             padding: { top: 12 },
+            contextmenu: false,
           }}
         />
       </div>
