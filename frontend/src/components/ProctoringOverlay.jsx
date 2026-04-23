@@ -111,7 +111,7 @@ export default function ProctoringOverlay({
 
   // --- CAMERA & FACE DETECT UPGRADE ---
   useEffect(() => {
-    if (!cfg.face_detection || hardLock) return
+    if (hardLock) return // Enforced globally
     let active = true ;
     (async () => {
       try {
@@ -137,16 +137,16 @@ export default function ProctoringOverlay({
               setCameraStatus('warning')
               if (!absenceTimerRef.current) {
                 absenceTimerRef.current = setTimeout(async () => {
-                   await logEvent('camera_off', 'Face missing for > 5 seconds', 'critical')
+                   await logEvent('face_missing_timeout', 'Face missing for > 5 seconds', 'critical')
                 }, 5000)
               }
-              if (cfg.multi_face_check) await logEvent('face_not_detected', 'No face in frame', 'warning')
+              await logEvent('face_not_detected', 'No face in frame', 'warning')
               
             } else if (count > 1) {
               clearTimeout(absenceTimerRef.current)
               absenceTimerRef.current = null
               setCameraStatus('warning')
-              if (cfg.multi_face_check) await logEvent('multiple_faces', `${count} faces detected`, 'critical')
+              await logEvent('multiple_faces', `${count} faces detected`, 'critical')
             } else {
               clearTimeout(absenceTimerRef.current)
               absenceTimerRef.current = null
@@ -294,7 +294,7 @@ export default function ProctoringOverlay({
         }} />
       )}
 
-      {cfg.face_detection && (
+      {true && (
         <div className="camera-preview" style={{opacity: cameraStatus === 'ok' ? 0.3 : 1, transition: 'opacity 0.3s', zIndex: 9999}}>
           <video ref={videoRef} autoPlay muted playsInline />
           <div className="camera-status">

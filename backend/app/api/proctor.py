@@ -44,9 +44,10 @@ VIOLATION_WEIGHTS = {
     "paste_attempt": 20,
     "screenshot_attempt": 50,
     "devtools_attempt": 40,
-    "camera_off": 40,
+    "camera_off": 100,             # Instant termination
     "face_not_detected": 10,
-    "multiple_faces": 50,
+    "face_missing_timeout": 100,   # Instant termination
+    "multiple_faces": 100,         # Instant termination
     "fullscreen_exit": 15,
     "keyboard_shortcut": 10
 }
