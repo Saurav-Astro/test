@@ -7,6 +7,9 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# Set API base for production build
+ENV VITE_API_BASE=/api/v1
 RUN npm run build
 
 # Stage 2: Serve
