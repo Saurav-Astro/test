@@ -1,34 +1,41 @@
 import asyncio
-from motor.motor_asyncio import AsyncIOMotorClient
-from app.core.config import settings
+import uuid
+from sqlalchemy import select
+from app.core.sqlite import async_session, LocalUser, init_sqlite
 from app.core.security import hash_password
 
 async def create_users():
-    client = AsyncIOMotorClient(settings.MONGODB_URI)
-    db = client[settings.DB_NAME]
-    
-    users_to_create = [
-        ("admin@proxm.io", "System Admin", "admin", "faculty_users"),
-        ("faculty@proxm.io", "Exam Faculty", "faculty", "faculty_users"),
-        ("student@proxm.io", "Test Student", "student", "users")
-    ]
-    
-    password_hash = hash_password("password123")
-    
-    for email, name, role, collection in users_to_create:
-        # Check if exists
-        exists = await db[collection].find_one({"email": email})
-        if not exists:
-            await db[collection].insert_one({
-                "email": email,
-                "name": name,
-                "password_hash": password_hash,
-                "role": role,
-                "is_active": True
-            })
-            print(f"✅ Created {role}: {email}")
-        else:
-            print(f"ℹ️ {email} already exists")
+    await init_sqlite()
+    async with async_session() as session:
+        users_to_create = [
+            ("admin@proxm.io", "System Admin", "admin"),
+            ("faculty@proxm.io", "Exam Faculty", "faculty"),
+            ("student@proxm.io", "Test Student", "student")
+        ]
+        
+        password_hash = hash_password("password123")
+        
+        for email, name, role in users_to_create:
+            stmt = select(LocalUser).where(LocalUser.email == email)
+            result = await session.execute(stmt)
+            user = result.scalar_one_or_none()
+            
+            if not user:
+                user = LocalUser(
+                    id=str(uuid.uuid4()),
+                    email=email,
+                    name=name,
+                    password_hash=password_hash,
+                    role=role,
+                    is_active=True
+                )
+                session.add(user)
+                print(f"? Created {role}: {email}")
+            else:
+                user.password_hash = password_hash
+                print(f"?? Updated password for {email}")
+        
+        await session.commit()
 
 if __name__ == "__main__":
     asyncio.run(create_users())
