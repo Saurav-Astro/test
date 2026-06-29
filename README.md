@@ -104,5 +104,3 @@ npm run dev
 - **Camera Access:** AI proctoring requires browser camera permissions. Ensure your browser allows camera access on the `/exam` routes.
 
 ---
-
-Built with ❤️ by ProXM Team.
